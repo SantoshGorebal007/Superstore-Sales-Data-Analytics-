@@ -18,12 +18,12 @@ This project analyzes Superstore sales data using Tableau, focusing on over 8,50
 - **ETL (Extract, Transform, Load)** and **ELT (Extract, Load, Transform)** methods were used to clean and prepare the sales data for analysis.
 
 ## Dashboard Preview
----
+
 <img src="Images/Dashboard.png" alt="Dashboard Image" width="600" />
 
 ---
----
-- **Sales amount by Region :** Visualizes sales distribution by region with amount 
+
+- **Sales Profit by Region :** Visualizes sales distribution by region with amount 
 
 <img src="Images/Region Sales.png" alt="Bar chat " width="600" />
 
