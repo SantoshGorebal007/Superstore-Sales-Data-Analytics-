@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Superstore Sales Data Analytics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+        :root {
+  --primary-color: #2c3e50;
+  --secondary-color: #34495e;
+  --background-color: #f4e3e3d4;
+  --text-color: #2c3e50;
+  --accent-color: #1175d8;
+  --d: 6000ms;
+  --angle: 90deg;
+  --gradX: 100%;
+  --gradY: 50%;
+  --c1: rgba(168, 239, 255, 1);
+  --c2: rgba(168, 239, 255, 0.1);
+}
+
+        @property --angle {
+          syntax: '<angle>';
+          initial-value: 90deg;
+          inherits: true;
+        }
+        @property --gradX {
+          syntax: '<percentage>';
+          initial-value: 50%;
+          inherits: true;
+        }
+        @property --gradY {
+          syntax: '<percentage>';
+          initial-value: 0%;
+          inherits: true;
+        }
+        /* Remove animated border effect from main sections and download button */
+.section,
+.download-button {
+  border: 0.35rem solid;
+  border-image: conic-gradient(from var(--angle), var(--c2), var(--c1) 0.1turn, var(--c1) 0.15turn, var(--c2) 0.25turn) 30;
+  animation: borderRotate var(--d) cubic-bezier(0.4,0,0.2,1) infinite forwards;
+}
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #dfe8e78e, #5d85b7db);
+  color: #333;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.15); /* transparent background */
+  border-radius: 20px;
+  padding: 20px;
+}
+
+
+
+.profile,
+.dashboard-container {
+  background: rgba(255, 255, 255, 0.1); /* More transparent background */
+  backdrop-filter: blur(10px); /* Slightly less blur for inner elements */
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  margin-bottom: 30px;
+  overflow-x: auto;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+
+@keyframes glow {
+  0% {
+    border-color: #1175d8;
+    box-shadow: none;
+  }
+  50% {
+    border-color: #42a5ff;
+    box-shadow: 0 0 12px 4px #42a5ff;
+  }
+  100% {
+    border-color: #1175d8;
+    box-shadow: none;
+  }
+}
+
+
+.section,
+.skills-section,
+.download-button {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+  padding: 20px;
+  margin-bottom: 30px;
+  transition: box-shadow 0.3s, border-color 0.3s;
+  isolation: isolate;
+}
+/* Remove conic-gradient border animation and related mask from sections and download button */
+.section::before,
+.skills-section::before,
+.download-button::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  display: block;
+  overflow: visible;
+  mask: none;
+  pointer-events: none;
+  animation: none;
+}
+.section:hover::before,
+.skills-section:hover::before,
+.download-button:hover::before {
+  animation-play-state: initial;
+}
+
+@property --angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0turn;
+}
+@keyframes spin {
+  to {
+    --angle: 1turn;
+  }
+}
+
+.profile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.profile-image {
+  width: 120px;
+  height: 120px;
+  align-items: center;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-iframe {
+  width: 100%;
+  height: 85vh;
+  border: none;
+  border-radius: 12px;
+}
+
+.section-header {
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.section-content {
+  display: none;
+  padding-top: 10px;
+}
+
+.section-content.active {
+  display: block;
+}
+
+.skill-item {
+  display: inline-block;
+  padding: 8px 16px;
+  margin: 6px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  font-weight: 500;
+}
+
+.download-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.25);
+  color: #000;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 14px;
+  transition: 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.download-button:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+  .profile-name {
+    /* font-size: 2rem; */
+    color:rgba(16, 2, 2, 0.676);
+  }
+ .profile-title {
+    /* font-size: 1rem; */
+    color: red;
+    
+  }
+
+
+        /* Responsive Adjustments */
+     @media (max-width: 1024px) {
+  .container {
+    padding: 20px;
+  }
+
+  .dashboard-container {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .dashboard-container .tableauPlaceholder {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .profile-name {
+    font-size: 2rem;
+  }
+
+  .profile-image {
+    width: 120px;
+    height: 120px;
+  }
+
+  .dashboard-iframe {
+    height: 65vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .profile-name {
+    font-size: 1.6rem;
+  }
+
+  .profile-title {
+    font-size: 1rem;
+  }
+
+  .dashboard-iframe {
+    height: 60vh;
+    width: 100%;
+  }
+
+  .skills-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .section-toggle {
+    align-self: flex-end;
+  }
+
+  .download-button {
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 10px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-name {
+    font-size: 1.4rem;
+  }
+
+  .profile-title {
+    font-size: 0.9rem;
+    /* color: aqua; */
+  }
+
+  .dashboard-iframe {
+    height: 55vh;
+  }
+
+  .skill-card {
+    padding: 1rem;
+  }
+
+  .skill-card h3 {
+    font-size: 1rem;
+  }
+
+  .skill-card p {
+    font-size: 0.8rem;
+  }
+
+  .social-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .social-links a {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+}
+
+
+
+        /* Skills Section */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  justify-items: center;
+}
+
+.skill-card {
+  background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(154, 154, 154, 0.2); /* Lighter shadow for shining effect */
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  max-width: 250px;
+  border: 1px solid rgba(255, 255, 255, 0.5); /* Shining border for skill cards */
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.skill-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(137, 137, 137, 0.3);
+}
+
+.skill-card .icon {
+  font-size: 2.5rem;
+  color: var(--accent-color);
+  margin-bottom: 1rem;
+}
+
+.skill-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.skill-card p {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+
+    .social-links {
+      display: flex;
+      gap: 20px;
+    }
+    .social-links a {
+      text-decoration: none;
+      color: #fff;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      transition: transform 0.3s, box-shadow 0.3s;
+      background-color: rgba(255, 255, 255, 0.1); /* Transparent background for social icons */
+      border: 1px solid rgba(255, 255, 255, 0.4); /* Shining border for social icons */
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+    .social-links a:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 25px rgba(255, 255, 255, 0.6); /* Enhanced shining on hover */
+    }
+    /* Specific colors for social icons for better visibility over transparent background */
+    .instagram { background-color: rgba(48, 133, 225, 0.7); }
+    .linkedin { background-color: rgba(0, 119, 181, 0.7); }
+    .github { background-color: rgba(51, 51, 51, 0.7); }
+    .gmail { background-color: rgba(54, 116, 209, 0.7); }
+    .social-links i {
+      font-size: 24px;
+    }
+
+    .social-section
+    {
+        display: flex;
+        justify-content: center;
+ 
+    }
+
+    /* Horizontal scroll for skill cards */
+.skills-grid.horizontal-scroll {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  overflow-x: hidden;
+  padding-bottom: 10px;
+  align-items: flex-start;
+  position: relative;
+}
+.skills-grid.horizontal-scroll .skill-card {
+  min-width: 200px;
+  max-width: 200px;
+  height: 260px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+.skills-grid.horizontal-scroll .skill-card .icon {
+  flex-shrink: 0;
+}
+.skills-grid.horizontal-scroll .skill-card h3,
+.skills-grid.horizontal-scroll .skill-card p {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
+}
+.skills-grid.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .skills-grid.horizontal-scroll {
+    gap: 1rem;
+    padding-bottom: 8px;
+  }
+  .skills-grid.horizontal-scroll .skill-card {
+    min-width: 180px;
+    max-width: 180px;
+    height: 220px;
+    padding: 1rem 0.5rem;
+  }
+}
+@media (max-width: 768px) {
+  .skills-grid.horizontal-scroll {
+    gap: 0.7rem;
+    padding-bottom: 6px;
+  }
+  .skills-grid.horizontal-scroll .skill-card {
+    min-width: 150px;
+    max-width: 150px;
+    height: 180px;
+    padding: 0.7rem 0.3rem;
+  }
+  .skills-grid.horizontal-scroll .skill-card h3 {
+    font-size: 1rem;
+  }
+  .skills-grid.horizontal-scroll .skill-card p {
+    font-size: 0.8rem;
+  }
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile">
+            <!-- Morphing background removed -->
+            <img src="Images/SG web.jpeg" alt="Dashboard Preview" class="profile-image" style="position: relative; z-index: 1;">
+            <h1 class="profile-name">Superstore Sales Data Analytics</h1>
+            <p class="profile-title">Tableau Dashboard Project</p>
+            
+    
+        </div>
+
+       
+
+        <div class="dashboard-container">
+      <!-- Responsive Tableau Dashboard Embed -->
+      <div style="width: 100%; margin: 0; padding: 0;">
+        <div class='tableauPlaceholder' id='viz1754840407433' style='position: relative; width: 100%; min-height: 400px; max-width: 100%; box-sizing: border-box; margin: 0; padding: 0;'>
+          <noscript>
+            <a href='#'><img alt='Superstore Dashboard' src='https://public.tableau.com/static/images/Su/SuperStoreSales_17548392172580/Dashboard1/1_rss.png' style='border: none; width: 100%; max-width: 1200px;' /></a>
+          </noscript>
+          <object class='tableauViz' style='display:none; width: 100%; min-width: 280px; max-width: 100vw;'>
+            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+            <param name='embed_code_version' value='3' />
+            <param name='site_root' value='' />
+            <param name='name' value='SuperStoreSales_17548392172580/Dashboard1' />
+            <param name='tabs' value='yes' />
+            <param name='toolbar' value='yes' />
+            <param name='static_image' value='https://public.tableau.com/static/images/Su/SuperStoreSales_17548392172580/Dashboard1/1.png' />
+            <param name='animate_transition' value='yes' />
+            <param name='display_static_image' value='yes' />
+            <param name='display_spinner' value='yes' />
+            <param name='display_overlay' value='yes' />
+            <param name='display_count' value='yes' />
+            <param name='language' value='en-US' />
+          </object>
+        </div>
+        <script type='text/javascript'>
+          var divElement = document.getElementById('viz1754840407433');
+          var vizElement = divElement.getElementsByTagName('object')[0];
+          function setVizSize() {
+            var w = window.innerWidth;
+            if (w > 1200) {
+              vizElement.style.minWidth = '1000px';
+              vizElement.style.maxWidth = '1200px';
+              vizElement.style.minHeight = '700px';
+              vizElement.style.maxHeight = '900px';
+            } else if (w > 900) {
+              vizElement.style.minWidth = '600px';
+              vizElement.style.maxWidth = '100vw';
+              vizElement.style.minHeight = '500px';
+              vizElement.style.maxHeight = '700px';
+            } else if (w > 600) {
+              vizElement.style.minWidth = '320px';
+              vizElement.style.maxWidth = '100vw';
+              vizElement.style.minHeight = '400px';
+              vizElement.style.maxHeight = '600px';
+            } else {
+              vizElement.style.width = '100%';
+              vizElement.style.minWidth = '220px';
+              vizElement.style.maxWidth = '100vw';
+              vizElement.style.minHeight = '250px';
+              vizElement.style.maxHeight = '400px';
+            }
+          }
+          setVizSize();
+          window.addEventListener('resize', setVizSize);
+          var scriptElement = document.createElement('script');
+          scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+          vizElement.parentNode.insertBefore(scriptElement, vizElement);
+        </script>
+      </div>
+    </div>
+
+      
+
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Project Overview</h2>
+                <div class="section-toggle">+</div>
+            </div>
+            <div class="section-content">
+                <p>This Superstore Sales Data Analytics project leverages Tableau and ETL/ELT methods to analyze over 8,500 sales records. The dashboard provides actionable insights into sales performance, regional trends, monthly growth, and customer behavior, helping drive business decisions and strategy.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Dashboard Features</h2>
+                <div class="section-toggle">+</div>
+            </div>
+            <div class="section-content">
+        <p>The dashboard includes:
+        <ul>
+          <li>Pie Chart: Sales distribution by region</li>
+          <li>Line Chart: Sales trends over months</li>
+          <li>Scatter Plot: Relationship between sales and other variables</li>
+          <li>Bar Chart: Regional sales amounts</li>
+          <li>Exported images and video preview</li>
+        </ul>
+        </p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Sales Highlights</h2>
+                <div class="section-toggle">+</div>
+            </div>
+            <div class="section-content">
+        <ul>
+          <li>Analyzed over 8,500 sales records from Superstore dataset</li>
+          <li>Identified top-performing regions and months</li>
+          <li>Visualized sales growth and trends</li>
+          <li>Highlighted relationships between sales and other business metrics</li>
+        </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Data Cleaning & Methods</h2>
+                <div class="section-toggle">+</div>
+            </div>
+            <div class="section-content">
+                <p>Used ETL (Extract, Transform, Load) and ELT (Extract, Load, Transform) methods for cleaning and preparing the sales data. Ensured data quality and consistency for accurate analysis and visualization.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Regional & Monthly Analysis</h2>
+                <div class="section-toggle">+</div>
+            </div>
+            <div class="section-content">
+                <p>Explore how different regions and months contribute to overall sales performance. Identify high-performing areas and seasonal trends to inform business strategy and growth opportunities.</p>
+            </div>
+        </div>
+
+           <a href="Super Store.pdf" download="Superstore_Sales_Data_Analytics.pdf" class="download-button">Download Project PDF</a>
+ 
+
+          <section id="skills" style="padding: 2rem 0;">
+    <div class="container">
+      <h2 class="section-title" style="text-align: center; margin-bottom: 2rem;">Skill Set</h2>
+      <div class="skills-grid horizontal-scroll">
+        <div class="skill-card">
+          <div class="icon">
+            <i class="fab fa-python"></i>
+          </div>
+          <h3>Python</h3>
+          <p>Programming and data analysis</p>
+        </div>
+        <div class="skill-card">
+          <div class="icon">
+            <i class="fas fa-database"></i>
+          </div>
+          <h3>SQL</h3>
+          <p>Data querying and database management</p>
+        </div>
+        <div class="skill-card">
+          <div class="icon">
+            <i class="fas fa-file-excel"></i>
+          </div>
+          <h3>Microsoft Excel</h3>
+          <p>Data analysis and spreadsheet management</p>
+        </div>
+        <div class="skill-card">
+          <div class="icon">
+            <i class="fab fa-aws"></i>
+          </div>
+          <h3>AWS</h3>
+          <p>Cloud computing and infrastructure</p>
+        </div>
+        <div class="skill-card">
+          <div class="icon">
+            <i class="fab fa-microsoft"></i>
+          </div>
+          <h3>Microsoft Azure</h3>
+          <p>Cloud platform and services</p>
+        </div>
+        <div class="skill-card">
+          <div class="icon">
+            <i class="fas fa-database"></i>
+          </div>
+          <h3>Cassandra</h3>
+          <p>Distributed NoSQL database</p>
+        </div>
+        <div class="skill-card">
+          <div class="icon">
+            <i class="fas fa-snowflake"></i>
+          </div>
+          <h3>Snowflake</h3>
+          <p>Cloud data warehousing</p>
+        </div>
+        <div class="skill-card">
+          <div class="icon">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <h3>Power BI</h3>
+          <p>Data visualization and dashboards</p>
+        </div>
+        <div class="skill-card">
+          <div class="icon">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <h3>Tableau</h3>
+          <p>Business intelligence and visualization</p>
+        </div>
+        <div class="skill-card">
+          <div class="icon">
+            <i class="fab fa-figma"></i>
+          </div>
+          <h3>Figma</h3>
+          <p>Design Theme and elements</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<style>
+/* Removed dropdown styles since skills are now direct cards */
+.skills-grid.horizontal-scroll {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  overflow-x: hidden;
+  padding-bottom: 10px;
+  align-items: flex-start;
+  position: relative;
+}
+.skills-grid.horizontal-scroll .skill-card {
+  min-width: 200px;
+  max-width: 200px;
+  height: 260px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+.skills-grid.horizontal-scroll .skill-card .icon {
+  flex-shrink: 0;
+}
+.skills-grid.horizontal-scroll .skill-card h3,
+.skills-grid.horizontal-scroll .skill-card p {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
+}
+.skills-grid.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .skills-grid.horizontal-scroll {
+    gap: 1rem;
+    padding-bottom: 8px;
+  }
+  .skills-grid.horizontal-scroll .skill-card {
+    min-width: 180px;
+    max-width: 180px;
+    height: 220px;
+    padding: 1rem 0.5rem;
+  }
+}
+@media (max-width: 768px) {
+  .skills-grid.horizontal-scroll {
+    gap: 0.7rem;
+    padding-bottom: 6px;
+  }
+  .skills-grid.horizontal-scroll .skill-card {
+    min-width: 150px;
+    max-width: 150px;
+    height: 180px;
+    padding: 0.7rem 0.3rem;
+  }
+  .skills-grid.horizontal-scroll .skill-card h3 {
+    font-size: 1rem;
+  }
+  .skills-grid.horizontal-scroll .skill-card p {
+    font-size: 0.8rem;
+  }
+}
+</style>
+
+<script>
+function autoScrollSkillsLoop() {
+  const container = document.querySelector('.skills-grid.horizontal-scroll');
+  if (!container) return;
+  // Clone skill cards for seamless infinite scroll
+  const cards = Array.from(container.children);
+  cards.forEach(card => {
+    const clone = card.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    container.appendChild(clone);
+  });
+  let scrollAmount = 0;
+  let lastTimestamp = null;
+  function scrollStep(timestamp) {
+    if (!lastTimestamp) lastTimestamp = timestamp;
+    const delta = timestamp - lastTimestamp;
+    lastTimestamp = timestamp;
+    scrollAmount += (delta * 0.04); // smooth speed
+    // When scrolled past the first set, reset to start
+    const singleSetWidth = container.scrollWidth / 2;
+    if (scrollAmount >= singleSetWidth) {
+      scrollAmount -= singleSetWidth;
+    }
+    container.scrollLeft = scrollAmount;
+    requestAnimationFrame(scrollStep);
+  }
+  requestAnimationFrame(scrollStep);
+}
+document.addEventListener('DOMContentLoaded', function() {
+  autoScrollSkillsLoop();
+});
+</script>
+
+  <div class="social-section">
+
+  
+
+    <div class="social-links">
+
+                
+        <a href="" class="instagram" target="_blank" title="Instagram">
+          <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://www.linkedin.com/in/santosh-kumar-787234341/" class="linkedin" target="_blank" title="LinkedIn">
+          <i class="fab fa-linkedin"></i>
+        </a>
+        <a href="https://github.com/SantoshGorebal007" class="github" target="_blank" title="GitHub">
+          <i class="fab fa-github"></i>
+        </a>
+        <a href="mailto:your-email@gmail.com" class="gmail" title="Gmail">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </div>
+    
+
+  </div>
+ 
+
+        </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.section');
+
+            sections.forEach(section => {
+                const header = section.querySelector('.section-header');
+                const content = section.querySelector('.section-content');
+                const toggle = section.querySelector('.section-toggle');
+
+                header.addEventListener('click', () => {
+                    // Close other sections
+                    sections.forEach(otherSection => {
+                        if (otherSection !== section) {
+                            otherSection.querySelector('.section-content').classList.remove('active');
+                            otherSection.querySelector('.section-toggle').textContent = '+';
+                        }
+                    });
+
+                    // Toggle current section
+                    content.classList.toggle('active');
+                    toggle.textContent = content.classList.contains('active') ? '−' : '+';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
